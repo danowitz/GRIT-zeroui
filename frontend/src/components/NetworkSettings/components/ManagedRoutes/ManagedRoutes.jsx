@@ -91,7 +91,7 @@ function ManagedRoutes({ routes, handleChange }) {
       </Typography>
       <Box border={1} borderColor="grey.300">
         <Grid item style={{ margin: "10px" }}>
-          <DataTable noHeader={true} columns={columns} data={routes} />
+          <DataTable theme="grit-dark" noHeader={true} columns={columns} data={routes} />
           <Divider />
           <Typography>{t("addRoute")}</Typography>
           <List

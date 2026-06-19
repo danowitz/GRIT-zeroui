@@ -101,7 +101,7 @@ function NetworkRules({ network, callback }) {
         <CodeMirror
           value={network["rulesSource"]}
           onChange={onChange}
-          options={{ tabSize: 2, lineWrapping: true }}
+          options={{ theme: "material-darker", tabSize: 2, lineWrapping: true }}
         />
         <Hidden mdDown>
           <div>

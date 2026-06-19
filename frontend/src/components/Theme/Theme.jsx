@@ -2,6 +2,7 @@ import { ThemeProvider } from "@material-ui/styles";
 import { createTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { red, amber } from "@material-ui/core/colors";
+import "./dataTableTheme"; // registers the "grit-dark" react-data-table-component theme
 
 // GRIT dark theme: dark surfaces with the existing amber/orange accent.
 // CssBaseline propagates background.default to <body> so the whole UI (and the
