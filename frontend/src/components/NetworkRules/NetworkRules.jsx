@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import CodeMirror from "@uiw/react-codemirror";
-import "codemirror/theme/3024-day.css";
+import "codemirror/theme/material-darker.css";
 import { compile } from "external/RuleCompiler";
 import debounce from "lodash/debounce";
 import { useState } from "react";
@@ -110,7 +110,7 @@ function NetworkRules({ network, callback }) {
               width="100%"
               height="50%"
               options={{
-                theme: "3024-day",
+                theme: "material-darker",
                 readOnly: true,
                 lineNumbers: false,
                 lineWrapping: true,
