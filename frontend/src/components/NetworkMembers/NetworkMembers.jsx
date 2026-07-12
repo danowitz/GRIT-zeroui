@@ -176,6 +176,7 @@ function NetworkMembers({ network }) {
           <Grid container>
             {members.length ? (
               <DataTable
+                theme="grit-dark"
                 noHeader={true}
                 columns={columns}
                 data={[...members]}

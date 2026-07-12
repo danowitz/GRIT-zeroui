@@ -114,7 +114,7 @@ function IPv4AutoAssign({ ipAssignmentPools, handleChange }) {
           {addressPool.map((item, index) => (
             <Grid item xs={3} key={item["name"]}>
               <Button
-                variant="contained"
+                variant="outlined"
                 fullWidth={true}
                 onClick={() => setDefaultPool(index)}
               >
@@ -130,6 +130,7 @@ function IPv4AutoAssign({ ipAssignmentPools, handleChange }) {
       <Box border={1} borderColor="grey.300">
         <Grid item style={{ margin: "10px" }}>
           <DataTable
+            theme="grit-dark"
             noHeader={true}
             columns={columns}
             data={ipAssignmentPools}
