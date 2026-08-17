@@ -1,0 +1,29 @@
+name: Refresh GRIT build status
+
+on:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Request current status measurement
+        env:
+          BUILD_STATUS_KEY: ${{ secrets.GRIT_BUILD_STATUS_KEY }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${BUILD_STATUS_KEY}" ]]; then
+            echo "GRIT_BUILD_STATUS_KEY is not configured" >&2
+            exit 1
+          fi
+          curl --fail-with-body --retry 3 \
+            --header "Authorization: Bearer ${BUILD_STATUS_KEY}" \
+            --header "Content-Type: application/json" \
+            --data "{\"repo\":\"${REPOSITORY_NAME}\"}" \
+            https://gritautomation.cloud/api/build-status/refresh
