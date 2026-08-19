@@ -9,14 +9,14 @@ The upstream baseline commit is recorded in `.grit-upstream-baseline`. Preserve 
 
 ## Repository map
 
-| Path | Responsibility |
-| --- | --- |
-| `frontend/` | React/Vite administrative UI and GRIT embedding behavior |
-| `backend/` | Express controller proxy, authentication, and persisted UI data |
-| `docker/` | Image build definitions |
-| `docs/` | Upstream and fork documentation |
-| `.github/workflows/publish-ghcr.yml` | GRIT container publication |
-| `docker-compose.yml` | Development/reference stack, not production configuration |
+| Path                                 | Responsibility                                                  |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `frontend/`                          | React/Vite administrative UI and GRIT embedding behavior        |
+| `backend/`                           | Express controller proxy, authentication, and persisted UI data |
+| `docker/`                            | Image build definitions                                         |
+| `docs/`                              | Upstream and fork documentation                                 |
+| `.github/workflows/publish-ghcr.yml` | GRIT container publication                                      |
+| `docker-compose.yml`                 | Development/reference stack, not production configuration       |
 
 ## Development
 
@@ -25,17 +25,18 @@ The repository uses Yarn workspaces.
 ```bash
 corepack enable
 yarn install --immutable
+yarn test
 yarn lint
 yarn workspace backend typecheck
 yarn workspace frontend typecheck
 yarn build
 ```
 
-There is currently no automated unit-test suite. Linting, type checking, building, CodeQL, and image publication are separate checks; none should be reported as unit tests or coverage.
+Backend lifecycle regressions run with Node's built-in test runner. Linting, type checking, building, CodeQL, image publication, and coverage remain separate checks.
 
 ## Build status
 
-The badges are tied to the latest verified `develop` commit. They explicitly show **not configured** for unit tests and coverage until real instrumentation exists. Detailed status is available to GRIT administrators at [gritautomation.cloud/build-status](https://gritautomation.cloud/build-status).
+The badges are tied to the latest verified `develop` commit. Backend tests are configured; coverage remains unconfigured until instrumentation is added. Detailed status is available to GRIT administrators at [gritautomation.cloud/build-status](https://gritautomation.cloud/build-status).
 
 ## Containers and deployment
 
