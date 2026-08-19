@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "node ./bin/www",
+    "test": "node --test services/*.test.js",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --pretty --noEmit -p tsconfig.json"
   },
