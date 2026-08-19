@@ -7,6 +7,10 @@ import * as network from "../services/network.js";
 import { api } from "../utils/controller-api.js";
 import { defaultRules } from "../utils/constants.js";
 import { getZTAddress } from "../utils/zt-address.js";
+import {
+  createNetwork as createManagedNetwork,
+  deleteNetwork as deleteManagedNetwork,
+} from "../services/network-lifecycle.js";
 
 let ZT_ADDRESS = null;
 getZTAddress().then(function (address) {
@@ -35,22 +39,28 @@ router.get("/:nwid", auth.isAuthorized, async function (req, res) {
 
 // create new network
 router.post("/", auth.isAuthorized, async function (req, res) {
-  let reqData = req.body;
-  if (reqData.config) {
-    const config = reqData.config;
-    delete reqData.config;
-    reqData = config;
-    reqData.rules = JSON.parse(defaultRules);
-  } else {
-    res.status(400).send({ error: "Bad request" });
+  if (!req.body.config) {
+    return res.status(400).send({ error: "Bad request" });
   }
-  api
-    .post("controller/network/" + ZT_ADDRESS + "______", reqData)
-    .then(async function (controllerRes) {
-      await network.createNetworkAdditionalData(controllerRes.data.id);
-      const data = await network.getNetworksData([controllerRes.data.id]);
-      res.send(data[0]);
+  try {
+    const data = await createManagedNetwork(req.body, {
+      controller: {
+        create: async (config) => {
+          const response = await api.post(
+            "controller/network/" + ZT_ADDRESS + "______",
+            { ...config, rules: JSON.parse(defaultRules) }
+          );
+          return response.data;
+        },
+      },
+      store: network,
     });
+    return res.send(data);
+  } catch (err) {
+    return res.status(500).send({
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 });
 
 // update network
@@ -76,15 +86,19 @@ router.post("/:nwid", auth.isAuthorized, async function (req, res) {
 // delete network
 router.delete("/:nwid", auth.isAuthorized, async function (req, res) {
   const nwid = req.params.nwid;
-  network.deleteNetworkAdditionalData(nwid);
-  api
-    .delete("controller/network/" + nwid)
-    .then(function (controllerRes) {
-      res.status(controllerRes.status).send("");
-    })
-    .catch(function (err) {
-      res.status(500).send({ error: err.message });
+  try {
+    const result = await deleteManagedNetwork(nwid, {
+      controller: {
+        delete: async (id) => api.delete("controller/network/" + id),
+      },
+      store: network,
     });
+    return res.status(result.status).send("");
+  } catch (err) {
+    return res.status(500).send({
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 });
 
 export default router;

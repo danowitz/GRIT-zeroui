@@ -53,19 +53,29 @@ export async function getNetworksData(nwids) {
   return data;
 }
 
-export async function createNetworkAdditionalData(nwid) {
+export async function createNetworkAdditionalData(nwid, data = {}) {
   const saveData = {
     id: nwid,
     additionalConfig: {
-      description: "",
-      rulesSource: defaultRulesSource,
-      tagsByName: {},
-      capabilitiesByName: {},
+      description: data.description || "",
+      rulesSource: data.rulesSource || defaultRulesSource,
+      tagsByName: data.tagsByName || {},
+      capabilitiesByName: data.capabilitiesByName || {},
     },
     members: [],
   };
 
   db.get("networks").push(saveData).write();
+}
+
+/**
+ * Get one network with its ZeroUI metadata.
+ * @param {string} nwid - ZeroTier network ID.
+ * @returns {Promise<object | undefined>} The combined network record, if present.
+ */
+export async function getNetwork(nwid) {
+  const data = await getNetworksData([nwid]);
+  return data[0];
 }
 
 export async function updateNetworkAdditionalData(nwid, data) {
