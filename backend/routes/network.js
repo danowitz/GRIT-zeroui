@@ -12,10 +12,10 @@ import {
   deleteNetwork as deleteManagedNetwork,
 } from "../services/network-lifecycle.js";
 
-let ZT_ADDRESS = null;
-getZTAddress().then(function (address) {
-  ZT_ADDRESS = address;
-});
+const CONTROLLER_ADDRESS_UNAVAILABLE =
+  "ZeroTier controller address is unavailable";
+const CONTROLLER_NETWORK_PATH = "controller/network/";
+const CONTROLLER_REQUEST_TIMEOUT_MS = 10_000;
 
 // get all networks
 router.get("/", auth.isAuthorized, async function (req, res) {
@@ -37,31 +37,111 @@ router.get("/:nwid", auth.isAuthorized, async function (req, res) {
   }
 });
 
-// create new network
-router.post("/", auth.isAuthorized, async function (req, res) {
-  if (!req.body.config) {
-    return res.status(400).send({ error: "Bad request" });
-  }
-  try {
-    const data = await createManagedNetwork(req.body, {
-      controller: {
-        create: async (config) => {
-          const response = await api.post(
-            "controller/network/" + ZT_ADDRESS + "______",
-            { ...config, rules: JSON.parse(defaultRules) }
-          );
-          return response.data;
+/**
+ * Build the network-creation route with replaceable controller dependencies.
+ * @param {object} [options] route dependencies
+ * @param {any} [options.controllerApi] ZeroTier controller API client
+ * @param {() => Promise<string | undefined>} [options.getControllerAddress] controller identity lookup
+ * @param {any} [options.networkService] persisted ZeroUI network metadata service
+ * @param {any} [options.createNetwork] managed network lifecycle function
+ * @param {string} [options.rules] default ZeroTier rules JSON
+ * @returns {(req: any, res: any) => Promise<any>} Express route handler
+ */
+export function createNetworkHandler(options = {}) {
+  const controllerApi = options.controllerApi || api;
+  const getControllerAddress = options.getControllerAddress || getZTAddress;
+  const networkService = options.networkService || network;
+  const createNetwork = options.createNetwork || createManagedNetwork;
+  const rules = options.rules || defaultRules;
+  return async function (req, res) {
+    if (!req.body || !req.body.config) {
+      return res.status(400).send({ error: "Bad request" });
+    }
+
+    let controllerAddress;
+    try {
+      controllerAddress = await getControllerAddress();
+    } catch {
+      return res.status(503).send({
+        error: CONTROLLER_ADDRESS_UNAVAILABLE,
+      });
+    }
+    if (!/^[\da-f]{10}$/.test(String(controllerAddress || ""))) {
+      return res.status(503).send({
+        error: CONTROLLER_ADDRESS_UNAVAILABLE,
+      });
+    }
+
+    let allocatedNetworkId;
+    try {
+      const data = await createNetwork(req.body, {
+        controller: {
+          create: async (config) => {
+            let controllerRes;
+            try {
+              controllerRes = await controllerApi.post(
+                CONTROLLER_NETWORK_PATH + controllerAddress + "______",
+                { ...config, rules: JSON.parse(rules) },
+                { timeout: CONTROLLER_REQUEST_TIMEOUT_MS }
+              );
+            } catch (err) {
+              const upstream = /** @type {{response?: {status?: number}}} */ (
+                err
+              );
+              const failure = Object.assign(
+                new Error("ZeroTier controller rejected network creation"),
+                {
+                  httpStatus: 502,
+                  upstreamStatus:
+                    upstream.response && upstream.response.status,
+                }
+              );
+              throw failure;
+            }
+            allocatedNetworkId = String(
+              (controllerRes.data && controllerRes.data.id) || ""
+            );
+            if (!/^[\da-f]{16}$/.test(allocatedNetworkId)) {
+              throw Object.assign(
+                new Error(
+                  "ZeroTier controller returned an invalid network identity"
+                ),
+                { httpStatus: 502 }
+              );
+            }
+            return controllerRes.data;
+          },
         },
-      },
-      store: network,
-    });
-    return res.send(data);
-  } catch (err) {
-    return res.status(500).send({
-      error: err instanceof Error ? err.message : String(err),
-    });
-  }
-});
+        store: networkService,
+      });
+      if (!data) {
+        return res.status(502).send({
+          error: "ZeroTier network was created but could not be read back",
+          networkId: allocatedNetworkId,
+        });
+      }
+      return res.send(data);
+    } catch (err) {
+      const failure = /** @type {{httpStatus?: number, upstreamStatus?: number, message?: string}} */ (
+        err
+      );
+      const status = failure.httpStatus || 500;
+      return res.status(status).send({
+        error:
+          status === 500
+            ? "ZeroUI could not persist the created network"
+            : failure.message,
+        ...(failure.upstreamStatus
+          ? { upstreamStatus: failure.upstreamStatus }
+          : {}),
+        ...(allocatedNetworkId ? { networkId: allocatedNetworkId } : {}),
+      });
+    }
+  };
+}
+
+// create new network
+router.post("/", auth.isAuthorized, createNetworkHandler());
 
 // update network
 router.post("/:nwid", auth.isAuthorized, async function (req, res) {
@@ -69,7 +149,7 @@ router.post("/:nwid", auth.isAuthorized, async function (req, res) {
   network.updateNetworkAdditionalData(nwid, req.body);
   if (req.body.config) {
     api
-      .post("controller/network/" + nwid, req.body.config)
+      .post(CONTROLLER_NETWORK_PATH + nwid, req.body.config)
       .then(async function () {
         const data = await network.getNetworksData([nwid]);
         res.send(data[0]);
@@ -89,7 +169,7 @@ router.delete("/:nwid", auth.isAuthorized, async function (req, res) {
   try {
     const result = await deleteManagedNetwork(nwid, {
       controller: {
-        delete: async (id) => api.delete("controller/network/" + id),
+        delete: async (id) => api.delete(CONTROLLER_NETWORK_PATH + id),
       },
       store: network,
     });

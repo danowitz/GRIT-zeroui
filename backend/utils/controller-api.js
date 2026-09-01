@@ -16,6 +16,7 @@ if (process.env.ZU_CONTROLLER_TOKEN) {
 export const api = axios.create({
   baseURL: baseURL,
   responseType: "json",
+  timeout: 10_000,
   headers: {
     "X-ZT1-Auth": token,
   },
