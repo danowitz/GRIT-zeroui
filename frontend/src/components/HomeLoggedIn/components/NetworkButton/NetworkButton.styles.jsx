@@ -2,20 +2,32 @@ import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
   link: {
-    display: "block",
-    textDecoration: "none",
-    color: theme.palette.text.primary,
+    position: "absolute",
+    inset: 0,
+    zIndex: 1,
     borderRadius: 9,
     "&:focus-visible": {
       outline: `3px solid ${theme.palette.primary.main}`,
       outlineOffset: 2,
     },
   },
+  srOnly: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: "hidden",
+    clip: "rect(0, 0, 0, 0)",
+    whiteSpace: "nowrap",
+    border: 0,
+  },
   card: {
+    position: "relative",
     minHeight: 76,
     display: "grid",
     gridTemplateColumns:
-      "minmax(180px, 2fr) minmax(190px, 1.5fr) minmax(140px, 1fr) 24px",
+      "minmax(180px, 2fr) minmax(180px, 1.4fr) minmax(120px, 1fr) minmax(120px, 1fr) 24px",
     alignItems: "center",
     gap: theme.spacing(3),
     padding: theme.spacing(1.5, 2),
@@ -53,6 +65,16 @@ const useStyles = makeStyles((theme) => ({
       gridColumn: "1",
     },
   },
+  hubDetail: {
+    position: "relative",
+    zIndex: 2,
+    [theme.breakpoints.down("sm")]: {
+      gridColumn: "1 / 3",
+    },
+    [theme.breakpoints.down("xs")]: {
+      gridColumn: "1",
+    },
+  },
   label: {
     color: theme.palette.text.secondary,
     fontSize: "0.6875rem",
@@ -82,7 +104,23 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: "0.8125rem",
   },
+  hubIp: {
+    color: theme.palette.primary.light,
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    fontSize: "0.8125rem",
+    textDecoration: "underline",
+    textUnderlineOffset: 3,
+    "&:hover": {
+      color: theme.palette.primary.main,
+    },
+    "&:focus-visible": {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: 3,
+      borderRadius: 2,
+    },
+  },
   chevron: {
+    gridColumn: "5",
     color: theme.palette.text.secondary,
     transition: "transform 140ms ease, color 140ms ease",
     "$card:hover &": {
@@ -91,11 +129,11 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.down("sm")]: {
       gridColumn: "3",
-      gridRow: "1 / 3",
+      gridRow: "1 / 4",
     },
     [theme.breakpoints.down("xs")]: {
       gridColumn: "2",
-      gridRow: "1 / 4",
+      gridRow: "1 / 5",
     },
   },
 }));

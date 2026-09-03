@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
     gap: theme.spacing(2),
     paddingBottom: theme.spacing(2.5),
     borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-    [theme.breakpoints.down("xs")]: {
+    [theme.breakpoints.down("sm")]: {
       alignItems: "stretch",
       flexDirection: "column",
     },
@@ -85,6 +85,18 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "0.8125rem",
     marginTop: theme.spacing(0.25),
   },
+  listControls: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1.5),
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+    },
+    [theme.breakpoints.down("xs")]: {
+      alignItems: "stretch",
+      flexDirection: "column",
+    },
+  },
   search: {
     width: 360,
     maxWidth: "100%",
@@ -92,6 +104,28 @@ const useStyles = makeStyles((theme) => ({
       borderRadius: 8,
       background: "rgba(0, 0, 0, 0.16)",
     },
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+    },
+  },
+  sort: {
+    width: 150,
+    flexShrink: 0,
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 8,
+      background: "rgba(0, 0, 0, 0.16)",
+    },
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+    },
+  },
+  refreshHubIps: {
+    minHeight: 40,
+    flexShrink: 0,
+    borderRadius: 8,
+    fontWeight: 600,
+    textTransform: "none",
+    whiteSpace: "nowrap",
     [theme.breakpoints.down("xs")]: {
       width: "100%",
     },

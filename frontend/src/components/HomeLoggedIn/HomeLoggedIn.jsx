@@ -7,15 +7,21 @@ import {
   TextField,
   InputAdornment,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from "@material-ui/icons/Close";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import SearchIcon from "@material-ui/icons/Search";
 import useStyles from "./HomeLoggedIn.styles";
 
 import NetworkButton from "./components/NetworkButton";
 
 import API from "utils/API";
+import { clearHubIpCache } from "utils/HubIpCache";
 import { getCIDRAddress } from "utils/IP";
 import { generateNetworkConfig } from "utils/NetworkConfig";
 
@@ -26,6 +32,8 @@ function HomeLoggedIn() {
     /** @type {Array<any> | null} */ (null)
   );
   const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState("recent");
+  const [hubIpRefreshVersion, setHubIpRefreshVersion] = useState(0);
 
   const classes = useStyles();
   const history = useHistory();
@@ -47,11 +55,16 @@ function HomeLoggedIn() {
 
   const { t } = useTranslation();
 
-  const filteredNetworks = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase();
-    if (!networks || !normalizedQuery) return networks || [];
+  const refreshHubIps = () => {
+    clearHubIpCache();
+    setHubIpRefreshVersion((version) => version + 1);
+  };
 
-    return networks.filter((network) => {
+  const visibleNetworks = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+    const filtered = (networks || []).filter((network) => {
+      if (!normalizedQuery) return true;
+
       const pool = network.config?.ipAssignmentPools?.[0];
       const cidr = pool && getCIDRAddress(pool.ipRangeStart, pool.ipRangeEnd);
       const searchableValues = [
@@ -68,7 +81,43 @@ function HomeLoggedIn() {
           .includes(normalizedQuery)
       );
     });
-  }, [networks, query]);
+
+    return filtered
+      .map((network, index) => ({ network, index }))
+      .sort((left, right) => {
+        if (sortBy === "name") {
+          const leftName = left.network.config?.name || "";
+          const rightName = right.network.config?.name || "";
+          return (
+            leftName.localeCompare(rightName, undefined, {
+              sensitivity: "base",
+              numeric: true,
+            }) || left.index - right.index
+          );
+        }
+
+        const leftCreationTime = left.network.config?.creationTime;
+        const rightCreationTime = right.network.config?.creationTime;
+        const leftCreated = Number(leftCreationTime);
+        const rightCreated = Number(rightCreationTime);
+        const leftHasCreationTime =
+          leftCreationTime != null && Number.isFinite(leftCreated);
+        const rightHasCreationTime =
+          rightCreationTime != null && Number.isFinite(rightCreated);
+
+        if (leftHasCreationTime !== rightHasCreationTime) {
+          return leftHasCreationTime ? -1 : 1;
+        }
+        if (!leftHasCreationTime) return left.index - right.index;
+
+        const difference = rightCreated - leftCreated;
+        return (
+          (sortBy === "oldest" ? -difference : difference) ||
+          left.index - right.index
+        );
+      })
+      .map(({ network }) => network);
+  }, [networks, query, sortBy]);
 
   const networkCount = networks?.length || 0;
   const hasNetworks = networkCount > 0;
@@ -114,41 +163,70 @@ function HomeLoggedIn() {
             {hasNetworks && (
               <Typography className={classes.resultCount} aria-live="polite">
                 {t("networkResults", {
-                  shown: filteredNetworks.length,
+                  shown: visibleNetworks.length,
                   total: networkCount,
                 })}
               </Typography>
             )}
           </div>
           {hasNetworks && (
-            <TextField
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              variant="outlined"
-              size="small"
-              className={classes.search}
-              label={t("searchNetworks")}
-              placeholder={t("searchNetworksPlaceholder")}
-              inputProps={{ "aria-label": t("searchNetworks") }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: query ? (
-                  <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={() => setQuery("")}
-                      aria-label={t("clearSearch")}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ) : null,
-              }}
-            />
+            <div className={classes.listControls}>
+              <TextField
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                variant="outlined"
+                size="small"
+                className={classes.search}
+                label={t("searchNetworks")}
+                placeholder={t("searchNetworksPlaceholder")}
+                inputProps={{ "aria-label": t("searchNetworks") }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: query ? (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => setQuery("")}
+                        aria-label={t("clearSearch")}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null,
+                }}
+              />
+              <FormControl
+                variant="outlined"
+                size="small"
+                className={classes.sort}
+              >
+                <InputLabel id="network-sort-label">{t("sortBy")}</InputLabel>
+                <Select
+                  labelId="network-sort-label"
+                  value={sortBy}
+                  onChange={(event) => setSortBy(String(event.target.value))}
+                  label={t("sortBy")}
+                  inputProps={{ "aria-label": t("sortNetworks") }}
+                >
+                  <MenuItem value="recent">{t("recent")}</MenuItem>
+                  <MenuItem value="oldest">{t("oldest")}</MenuItem>
+                  <MenuItem value="name">{t("nameAscending")}</MenuItem>
+                </Select>
+              </FormControl>
+              <Button
+                variant="outlined"
+                color="primary"
+                className={classes.refreshHubIps}
+                onClick={refreshHubIps}
+                startIcon={<RefreshIcon />}
+              >
+                {t("refreshHubIps")}
+              </Button>
+            </div>
           )}
         </div>
 
@@ -156,10 +234,14 @@ function HomeLoggedIn() {
           <div className={classes.emptyState}>{t("loadingNetworks")}</div>
         ) : !hasNetworks ? (
           <div className={classes.emptyState}>{t("createOneNetwork")}</div>
-        ) : filteredNetworks.length ? (
+        ) : visibleNetworks.length ? (
           <div className={classes.networkList}>
-            {filteredNetworks.map((network) => (
-              <NetworkButton key={network.id} network={network} />
+            {visibleNetworks.map((network) => (
+              <NetworkButton
+                key={network.id}
+                network={network}
+                refreshVersion={hubIpRefreshVersion}
+              />
             ))}
           </div>
         ) : (
