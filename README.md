@@ -53,3 +53,10 @@ Container publication, production image selection, controller restart, identity 
 ## Ownership
 
 Internal GRIT Automation engineering repository. The default branch is `develop`. Upstream licensing files remain authoritative for inherited code; GRIT-specific operations remain private.
+
+## Automated tests
+
+Run `corepack yarn install --immutable` and `corepack yarn test` from the root.
+The backend entry point includes service, route, and utility tests. The central
+collector uses that same command and measures Node production-source coverage;
+frontend browser rendering is not included in that percentage.
