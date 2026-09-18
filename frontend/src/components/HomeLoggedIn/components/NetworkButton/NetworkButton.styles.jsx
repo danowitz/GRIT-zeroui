@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     minHeight: 76,
     display: "grid",
     gridTemplateColumns:
-      "minmax(160px, 1.7fr) minmax(190px, 1.35fr) minmax(135px, 1fr) minmax(115px, .8fr) minmax(125px, .9fr) 24px",
+      "minmax(150px, 1.4fr) minmax(175px, 1.2fr) minmax(120px, .9fr) minmax(105px, .7fr) minmax(115px, .8fr) minmax(250px, 1.8fr) 24px",
     alignItems: "center",
     gap: theme.spacing(3),
     padding: theme.spacing(1.5, 2),
@@ -103,6 +103,25 @@ const useStyles = makeStyles((theme) => ({
       gridColumn: "1",
     },
   },
+  supportActions: {
+    gridColumn: "6",
+    position: "relative",
+    zIndex: 3,
+    display: "flex",
+    flexWrap: "wrap",
+    gap: theme.spacing(0.5),
+    "& .MuiButton-root": {
+      fontSize: "0.68rem",
+      padding: theme.spacing(0.25, 0.75),
+    },
+    [theme.breakpoints.down("sm")]: { gridColumn: "1 / 3" },
+    [theme.breakpoints.down("xs")]: { gridColumn: "1" },
+  },
+  supportStatus: {
+    flexBasis: "100%",
+    color: theme.palette.text.secondary,
+    fontSize: "0.7rem",
+  },
   label: {
     color: theme.palette.text.secondary,
     fontSize: "0.6875rem",
@@ -165,7 +184,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   chevron: {
-    gridColumn: "6",
+    gridColumn: "7",
     color: theme.palette.text.secondary,
     transition: "transform 140ms ease, color 140ms ease",
     "$card:hover &": {

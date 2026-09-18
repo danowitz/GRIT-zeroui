@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
-import { IconButton, Tooltip, Typography } from "@material-ui/core";
+import { Button, IconButton, Tooltip, Typography } from "@material-ui/core";
 import CheckIcon from "@material-ui/icons/Check";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
@@ -14,6 +14,8 @@ import { cacheHubIp, readCachedHubIp } from "utils/HubIpCache";
 import { getCIDRAddress } from "utils/IP";
 // @ts-ignore Vite consumes this explicitly ESM utility; Node tests import it directly.
 import { findHubIp } from "utils/NetworkList.mjs";
+// @ts-ignore Vite consumes this explicitly ESM utility; Node tests import it directly.
+import { requestRemoteSupport } from "utils/RemoteSupport.mjs";
 
 async function copyText(value) {
   if (navigator.clipboard?.writeText) {
@@ -38,6 +40,7 @@ function NetworkButton({ network, refreshVersion = 0 }) {
   const [hubIp, setHubIp] = useState(/** @type {string | null} */ (null));
   const [shouldLoadHubIp, setShouldLoadHubIp] = useState(false);
   const [copiedValue, setCopiedValue] = useState("");
+  const [supportStatus, setSupportStatus] = useState("");
   const pool = network.config?.ipAssignmentPools?.[0];
   const cidr = pool && getCIDRAddress(pool.ipRangeStart, pool.ipRangeEnd);
   const name = network.config?.name || t("unnamedNetwork");
@@ -120,6 +123,46 @@ function NetworkButton({ network, refreshVersion = 0 }) {
     </Tooltip>
   );
 
+  useEffect(() => {
+    const receiveResult = (event) => {
+      if (event.source !== window.parent) return;
+      if (
+        event.origin !== "https://gritautomation.cloud" &&
+        event.origin !== "https://app.gritautomation.cloud"
+      )
+        return;
+      const data = event.data || {};
+      if (
+        data.type === "grit-support-result" &&
+        data.networkId === network.id
+      ) {
+        setSupportStatus(data.message || data.status || "");
+      }
+    };
+    window.addEventListener("message", receiveResult);
+    return () => window.removeEventListener("message", receiveResult);
+  }, [network.id]);
+
+  const supportButton = (action, label, disabled = false) => (
+    <Button
+      size="small"
+      variant="outlined"
+      disabled={disabled}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setSupportStatus(`Requesting ${label}`);
+        if (!requestRemoteSupport(network.id, action)) {
+          setSupportStatus(
+            "Open this page through GRIT Cloud to use Remote Support"
+          );
+        }
+      }}
+    >
+      {label}
+    </Button>
+  );
+
   return (
     <div ref={cardRef} className={classes.card}>
       <Link
@@ -168,6 +211,20 @@ function NetworkButton({ network, refreshVersion = 0 }) {
       <div className={`${classes.detail} ${classes.accessDetail}`}>
         <Typography className={classes.label}>{t("lastAccessed")}</Typography>
         <Typography className={classes.accessed}>{lastAccessed}</Typography>
+      </div>
+      <div
+        className={classes.supportActions}
+        aria-label="Remote Support actions"
+      >
+        {supportButton("connect", "Connect")}
+        {supportButton("disconnect", "Disconnect")}
+        {supportButton("ssh", "SSH to Hub", !hubIp)}
+        {supportButton("open-hub", "Open Hub", !hubIp)}
+        {supportStatus && (
+          <Typography className={classes.supportStatus}>
+            {supportStatus}
+          </Typography>
+        )}
       </div>
       <ChevronRightIcon className={classes.chevron} aria-hidden="true" />
     </div>
