@@ -27,18 +27,18 @@ const useStyles = makeStyles((theme) => ({
     minHeight: 76,
     display: "grid",
     gridTemplateColumns:
-      "minmax(180px, 2fr) minmax(180px, 1.4fr) minmax(120px, 1fr) minmax(120px, 1fr) 24px",
+      "minmax(160px, 1.7fr) minmax(190px, 1.35fr) minmax(135px, 1fr) minmax(115px, .8fr) minmax(125px, .9fr) 24px",
     alignItems: "center",
     gap: theme.spacing(3),
     padding: theme.spacing(1.5, 2),
-    background: "rgba(255, 255, 255, 0.025)",
-    border: "1px solid rgba(255, 255, 255, 0.09)",
+    background: "#ffffff",
+    border: "1px solid #dfe2e5",
     borderRadius: 9,
     transition:
       "border-color 140ms ease, background-color 140ms ease, transform 140ms ease",
     "&:hover": {
-      background: "rgba(255, 193, 7, 0.055)",
-      borderColor: "rgba(255, 193, 7, 0.55)",
+      background: "#fff8f5",
+      borderColor: theme.palette.primary.main,
       transform: "translateY(-1px)",
     },
     [theme.breakpoints.down("sm")]: {
@@ -65,11 +65,39 @@ const useStyles = makeStyles((theme) => ({
       gridColumn: "1",
     },
   },
+  networkDetail: {
+    gridColumn: "2",
+    [theme.breakpoints.down("sm")]: {
+      gridColumn: "1",
+    },
+    [theme.breakpoints.down("xs")]: {
+      gridColumn: "1",
+    },
+  },
   hubDetail: {
+    gridColumn: "3",
     position: "relative",
     zIndex: 2,
     [theme.breakpoints.down("sm")]: {
-      gridColumn: "1 / 3",
+      gridColumn: "2",
+    },
+    [theme.breakpoints.down("xs")]: {
+      gridColumn: "1",
+    },
+  },
+  cidrDetail: {
+    gridColumn: "4",
+    [theme.breakpoints.down("sm")]: {
+      gridColumn: "1",
+    },
+    [theme.breakpoints.down("xs")]: {
+      gridColumn: "1",
+    },
+  },
+  accessDetail: {
+    gridColumn: "5",
+    [theme.breakpoints.down("sm")]: {
+      gridColumn: "2",
     },
     [theme.breakpoints.down("xs")]: {
       gridColumn: "1",
@@ -92,7 +120,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
   },
   nwid: {
-    color: theme.palette.primary.light,
+    color: theme.palette.text.primary,
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: "0.8125rem",
     overflow: "hidden",
@@ -104,8 +132,25 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: "0.8125rem",
   },
+  accessed: {
+    color: theme.palette.text.secondary,
+    fontSize: "0.8125rem",
+  },
+  copyValue: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(0.5),
+    minWidth: 0,
+  },
+  copyButton: {
+    position: "relative",
+    zIndex: 3,
+    flexShrink: 0,
+    padding: 4,
+    color: theme.palette.primary.main,
+  },
   hubIp: {
-    color: theme.palette.primary.light,
+    color: theme.palette.primary.dark,
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: "0.8125rem",
     textDecoration: "underline",
@@ -120,7 +165,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   chevron: {
-    gridColumn: "5",
+    gridColumn: "6",
     color: theme.palette.text.secondary,
     transition: "transform 140ms ease, color 140ms ease",
     "$card:hover &": {
@@ -129,11 +174,11 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.down("sm")]: {
       gridColumn: "3",
-      gridRow: "1 / 4",
+      gridRow: "1 / 6",
     },
     [theme.breakpoints.down("xs")]: {
       gridColumn: "2",
-      gridRow: "1 / 5",
+      gridRow: "1 / 6",
     },
   },
 }));

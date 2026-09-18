@@ -1,35 +1,34 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
-import { Typography } from "@material-ui/core";
+import { IconButton, Tooltip, Typography } from "@material-ui/core";
+import CheckIcon from "@material-ui/icons/Check";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import FileCopyOutlinedIcon from "@material-ui/icons/FileCopyOutlined";
+import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import useStyles from "./NetworkButton.styles";
 
 import API from "utils/API";
-import { cacheHubIp, isIPv4, readCachedHubIp } from "utils/HubIpCache";
+import { cacheHubIp, readCachedHubIp } from "utils/HubIpCache";
 import { getCIDRAddress } from "utils/IP";
+// @ts-ignore Vite consumes this explicitly ESM utility; Node tests import it directly.
+import { findHubIp } from "utils/NetworkList.mjs";
 
-function findHubIp(members, networkId) {
-  const controllerId = String(networkId || "").slice(0, 10);
-  const candidates = (members || [])
-    .filter(
-      (member) =>
-        member.config?.authorized === true &&
-        member.config?.address !== controllerId
-    )
-    .map((member) => ({
-      member,
-      ip: member.config?.ipAssignments?.find(isIPv4),
-    }))
-    .filter(({ ip }) => Boolean(ip));
+async function copyText(value) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
 
-  const namedHub = candidates.find(({ member }) =>
-    String(member.name || "")
-      .toLocaleLowerCase()
-      .includes("hub")
-  );
-  return namedHub?.ip || candidates[0]?.ip || null;
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
 }
 
 function NetworkButton({ network, refreshVersion = 0 }) {
@@ -38,18 +37,18 @@ function NetworkButton({ network, refreshVersion = 0 }) {
   const cardRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const [hubIp, setHubIp] = useState(/** @type {string | null} */ (null));
   const [shouldLoadHubIp, setShouldLoadHubIp] = useState(false);
+  const [copiedValue, setCopiedValue] = useState("");
   const pool = network.config?.ipAssignmentPools?.[0];
   const cidr = pool && getCIDRAddress(pool.ipRangeStart, pool.ipRangeEnd);
   const name = network.config?.name || t("unnamedNetwork");
-  const isHubNetwork = String(network.config?.name || "")
-    .toLocaleLowerCase()
-    .includes("hub");
+  const accessedAt = Number(network.lastAccessedAt);
+  const lastAccessed = Number.isFinite(accessedAt)
+    ? formatDistanceToNow(accessedAt, { addSuffix: true })
+    : t("neverAccessed");
 
   useEffect(() => {
     setShouldLoadHubIp(false);
     setHubIp(null);
-    if (!isHubNetwork) return;
-
     const cached = readCachedHubIp(network.id);
     if (cached) setHubIp(cached.ip);
     if (cached?.fresh) return;
@@ -72,17 +71,17 @@ function NetworkButton({ network, refreshVersion = 0 }) {
     observer.observe(card);
 
     return () => observer.disconnect();
-  }, [isHubNetwork, network.id, refreshVersion]);
+  }, [network.id, refreshVersion]);
 
   useEffect(() => {
     let active = true;
 
-    if (isHubNetwork && shouldLoadHubIp) {
+    if (shouldLoadHubIp) {
       API.get(`network/${network.id}/member`)
         .then((response) => {
           if (!active) return;
 
-          const resolvedIp = findHubIp(response.data, network.id);
+          const resolvedIp = findHubIp(response.data);
           setHubIp(resolvedIp);
           cacheHubIp(network.id, resolvedIp);
         })
@@ -94,7 +93,32 @@ function NetworkButton({ network, refreshVersion = 0 }) {
     return () => {
       active = false;
     };
-  }, [isHubNetwork, network.id, shouldLoadHubIp]);
+  }, [network.id, shouldLoadHubIp]);
+
+  const handleCopy = (value) => async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await copyText(value);
+    setCopiedValue(value);
+    window.setTimeout(() => setCopiedValue(""), 1500);
+  };
+
+  const copyButton = (value, label) => (
+    <Tooltip title={copiedValue === value ? t("copied") : label}>
+      <IconButton
+        size="small"
+        className={classes.copyButton}
+        onClick={handleCopy(value)}
+        aria-label={label}
+      >
+        {copiedValue === value ? (
+          <CheckIcon fontSize="small" />
+        ) : (
+          <FileCopyOutlinedIcon fontSize="small" />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
 
   return (
     <div ref={cardRef} className={classes.card}>
@@ -111,30 +135,40 @@ function NetworkButton({ network, refreshVersion = 0 }) {
         </Typography>
         <Typography className={classes.name}>{name}</Typography>
       </div>
-      <div className={classes.detail}>
+      <div className={`${classes.detail} ${classes.networkDetail}`}>
         <Typography className={classes.label}>{t("networkId")}</Typography>
-        <Typography className={classes.nwid}>{network.id}</Typography>
+        <div className={classes.copyValue}>
+          <Typography className={classes.nwid}>{network.id}</Typography>
+          {copyButton(network.id, t("copyNetworkId"))}
+        </div>
       </div>
-      <div className={classes.detail}>
+      {hubIp && (
+        <div className={`${classes.detail} ${classes.hubDetail}`}>
+          <Typography className={classes.label}>{t("hubIpAddress")}</Typography>
+          <div className={classes.copyValue}>
+            <a
+              className={classes.hubIp}
+              href={`http://${hubIp}`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("openHub", { ip: hubIp })}
+            >
+              {hubIp}
+            </a>
+            {copyButton(hubIp, t("copyHubIp"))}
+          </div>
+        </div>
+      )}
+      <div className={`${classes.detail} ${classes.cidrDetail}`}>
         <Typography className={classes.label}>{t("ipRange")}</Typography>
         <Typography className={classes.cidr}>
           {cidr || t("notAssigned")}
         </Typography>
       </div>
-      {hubIp && (
-        <div className={`${classes.detail} ${classes.hubDetail}`}>
-          <Typography className={classes.label}>{t("hubIpAddress")}</Typography>
-          <a
-            className={classes.hubIp}
-            href={`http://${hubIp}`}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={t("openHub", { ip: hubIp })}
-          >
-            {hubIp}
-          </a>
-        </div>
-      )}
+      <div className={`${classes.detail} ${classes.accessDetail}`}>
+        <Typography className={classes.label}>{t("lastAccessed")}</Typography>
+        <Typography className={classes.accessed}>{lastAccessed}</Typography>
+      </div>
       <ChevronRightIcon className={classes.chevron} aria-hidden="true" />
     </div>
   );

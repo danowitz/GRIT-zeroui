@@ -24,6 +24,7 @@ function Network() {
 
   const fetchData = useCallback(async () => {
     try {
+      await API.post("network/" + nwid + "/access").catch(() => undefined);
       const network = await API.get("network/" + nwid);
       setNetwork(network.data);
       console.log("Current network:", network.data);

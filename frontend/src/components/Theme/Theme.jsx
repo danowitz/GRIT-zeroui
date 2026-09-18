@@ -1,25 +1,33 @@
 import { ThemeProvider } from "@material-ui/styles";
 import { createTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { red, amber } from "@material-ui/core/colors";
-import "./dataTableTheme"; // registers the "grit-dark" react-data-table-component theme
+import "./dataTableTheme";
 
-// GRIT dark theme: dark surfaces with the existing amber/orange accent.
-// CssBaseline propagates background.default to <body> so the whole UI (and the
-// embedded iframe in the GRIT cloud app) renders dark.
+// Match the light GRIT Cloud shell so the embedded app reads as one surface.
 const theme = createTheme({
   palette: {
-    type: "dark",
+    type: "light",
     primary: {
-      main: amber[500],
+      main: "#ef5b36",
+      dark: "#c94425",
     },
     secondary: {
-      main: red[500],
+      main: "#1b2025",
     },
     background: {
-      default: "#15171a",
-      paper: "#1e2227",
+      default: "#f7f6f2",
+      paper: "#ffffff",
     },
+    text: {
+      primary: "#242424",
+      secondary: "#66717c",
+    },
+  },
+  shape: {
+    borderRadius: 6,
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica Neue", Arial, sans-serif',
   },
 });
 

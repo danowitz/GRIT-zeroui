@@ -6,6 +6,11 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 1180,
     margin: "0 auto",
     padding: theme.spacing(6, 4, 8),
+    "html.grit-embedded &": {
+      maxWidth: "none",
+      margin: 0,
+      padding: 0,
+    },
     [theme.breakpoints.down("sm")]: {
       padding: theme.spacing(3, 2, 5),
     },
@@ -58,10 +63,10 @@ const useStyles = makeStyles((theme) => ({
   },
   networkSection: {
     background: theme.palette.background.paper,
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    border: "1px solid #dfe2e5",
     borderRadius: 12,
     padding: theme.spacing(3),
-    boxShadow: "0 18px 50px rgba(0, 0, 0, 0.18)",
+    boxShadow: "0 8px 28px rgba(30, 38, 45, 0.08)",
     [theme.breakpoints.down("xs")]: {
       margin: theme.spacing(0, -1),
       padding: theme.spacing(2),
@@ -74,7 +79,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     gap: theme.spacing(2),
     paddingBottom: theme.spacing(2.5),
-    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+    borderBottom: "1px solid #e5e7e9",
     [theme.breakpoints.down("sm")]: {
       alignItems: "stretch",
       flexDirection: "column",
@@ -102,18 +107,18 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: "100%",
     "& .MuiOutlinedInput-root": {
       borderRadius: 8,
-      background: "rgba(0, 0, 0, 0.16)",
+      background: "#ffffff",
     },
     [theme.breakpoints.down("xs")]: {
       width: "100%",
     },
   },
   sort: {
-    width: 150,
+    width: 190,
     flexShrink: 0,
     "& .MuiOutlinedInput-root": {
       borderRadius: 8,
-      background: "rgba(0, 0, 0, 0.16)",
+      background: "#ffffff",
     },
     [theme.breakpoints.down("xs")]: {
       width: "100%",

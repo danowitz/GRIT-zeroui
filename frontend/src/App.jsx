@@ -1,6 +1,6 @@
 import "@fontsource/roboto";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Redirect, Switch } from "react-router-dom";
 
 import Theme from "./components/Theme";
@@ -16,11 +16,23 @@ import Loading from "./components/Loading";
 import "./i18n";
 
 function App() {
+  let embedded = true;
+  try {
+    embedded = window.self !== window.top;
+  } catch {
+    // Cross-origin access means this app is embedded.
+  }
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("grit-embedded", embedded);
+    return () => document.documentElement.classList.remove("grit-embedded");
+  }, [embedded]);
+
   return (
     <Theme>
       <Suspense fallback={<Loading />}>
         <BrowserRouter basename="/app">
-          <Bar />
+          {!embedded && <Bar />}
           <Switch>
             <Route exact path="/" component={Home} />
             <Route path="/network/:nwid" component={Network} />

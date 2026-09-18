@@ -37,6 +37,21 @@ router.get("/:nwid", auth.isAuthorized, async function (req, res) {
   }
 });
 
+export function createNetworkAccessHandler(options = {}) {
+  const networkService = options.networkService || network;
+  return async function (req, res) {
+    const lastAccessedAt = await networkService.markNetworkAccessed(
+      req.params.nwid
+    );
+    if (lastAccessedAt === undefined) {
+      return res.status(404).send({ error: "Network not found" });
+    }
+    return res.send({ lastAccessedAt });
+  };
+}
+
+router.post("/:nwid/access", auth.isAuthorized, createNetworkAccessHandler());
+
 /**
  * Build the network-creation route with replaceable controller dependencies.
  * @param {object} [options] route dependencies
@@ -92,8 +107,7 @@ export function createNetworkHandler(options = {}) {
                 new Error("ZeroTier controller rejected network creation"),
                 {
                   httpStatus: 502,
-                  upstreamStatus:
-                    upstream.response && upstream.response.status,
+                  upstreamStatus: upstream.response && upstream.response.status,
                 }
               );
               throw failure;
@@ -122,9 +136,10 @@ export function createNetworkHandler(options = {}) {
       }
       return res.send(data);
     } catch (err) {
-      const failure = /** @type {{httpStatus?: number, upstreamStatus?: number, message?: string}} */ (
-        err
-      );
+      const failure =
+        /** @type {{httpStatus?: number, upstreamStatus?: number, message?: string}} */ (
+          err
+        );
       const status = failure.httpStatus || 500;
       return res.status(status).send({
         error:

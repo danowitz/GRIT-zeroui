@@ -1,4 +1,6 @@
-const HUB_IP_CACHE_PREFIX = "zero-ui:hub-ip:v1:";
+// v2 invalidates entries created by the old fallback that could cache a
+// non-Hub member's address when no member name contained "hub".
+const HUB_IP_CACHE_PREFIX = "zero-ui:hub-ip:v2:";
 const HUB_IP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function isIPv4(value) {

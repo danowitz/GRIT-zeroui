@@ -23,6 +23,8 @@ import NetworkButton from "./components/NetworkButton";
 import API from "utils/API";
 import { clearHubIpCache } from "utils/HubIpCache";
 import { getCIDRAddress } from "utils/IP";
+// @ts-ignore Vite consumes this explicitly ESM utility; Node tests import it directly.
+import { sortNetworks } from "utils/NetworkList.mjs";
 import { generateNetworkConfig } from "utils/NetworkConfig";
 
 import { useTranslation } from "react-i18next";
@@ -82,41 +84,7 @@ function HomeLoggedIn() {
       );
     });
 
-    return filtered
-      .map((network, index) => ({ network, index }))
-      .sort((left, right) => {
-        if (sortBy === "name") {
-          const leftName = left.network.config?.name || "";
-          const rightName = right.network.config?.name || "";
-          return (
-            leftName.localeCompare(rightName, undefined, {
-              sensitivity: "base",
-              numeric: true,
-            }) || left.index - right.index
-          );
-        }
-
-        const leftCreationTime = left.network.config?.creationTime;
-        const rightCreationTime = right.network.config?.creationTime;
-        const leftCreated = Number(leftCreationTime);
-        const rightCreated = Number(rightCreationTime);
-        const leftHasCreationTime =
-          leftCreationTime != null && Number.isFinite(leftCreated);
-        const rightHasCreationTime =
-          rightCreationTime != null && Number.isFinite(rightCreated);
-
-        if (leftHasCreationTime !== rightHasCreationTime) {
-          return leftHasCreationTime ? -1 : 1;
-        }
-        if (!leftHasCreationTime) return left.index - right.index;
-
-        const difference = rightCreated - leftCreated;
-        return (
-          (sortBy === "oldest" ? -difference : difference) ||
-          left.index - right.index
-        );
-      })
-      .map(({ network }) => network);
+    return sortNetworks(filtered, sortBy);
   }, [networks, query, sortBy]);
 
   const networkCount = networks?.length || 0;

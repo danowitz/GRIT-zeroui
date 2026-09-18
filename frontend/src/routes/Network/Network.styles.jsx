@@ -6,10 +6,18 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     margin: "3%",
+    "html.grit-embedded &": {
+      margin: 0,
+    },
   },
   breadcrumbs: {
     paddingTop: "2%",
     paddingLeft: "2%",
+    "html.grit-embedded &": {
+      paddingTop: 0,
+      paddingLeft: 0,
+      marginBottom: theme.spacing(2),
+    },
   },
 }));
 
