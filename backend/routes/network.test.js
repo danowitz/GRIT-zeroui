@@ -11,7 +11,9 @@ const testDatabasePath = path.join(
 );
 process.env.ZU_DATAPATH = testDatabasePath;
 process.env.ZU_CONTROLLER_TOKEN = "test-token";
-const { createNetworkHandler } = await import("./network.js");
+const { createNetworkAccessHandler, createNetworkHandler } = await import(
+  "./network.js"
+);
 
 after(() => rmSync(testDatabasePath, { force: true }));
 
@@ -164,4 +166,22 @@ test("network creation reports metadata persistence failure for exact replay", a
     error: "ZeroUI could not persist the created network",
     networkId: "4601bd822eabcdef",
   });
+});
+
+test("network access records a server timestamp for recent sorting", async () => {
+  const accesses = [];
+  const handler = createNetworkAccessHandler({
+    networkService: {
+      markNetworkAccessed: async (networkId) => {
+        accesses.push(networkId);
+        return 1_795_027_200_000;
+      },
+    },
+  });
+  const response = responseRecorder();
+
+  await handler({ params: { nwid: "4601bd822e123456" } }, response);
+
+  assert.deepEqual(accesses, ["4601bd822e123456"]);
+  assert.deepEqual(response.body, { lastAccessedAt: 1_795_027_200_000 });
 });

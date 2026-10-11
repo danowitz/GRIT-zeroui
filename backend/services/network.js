@@ -103,6 +103,17 @@ export async function updateNetworkAdditionalData(nwid, data) {
   }
 }
 
+export async function markNetworkAccessed(nwid, timestamp = Date.now()) {
+  const network = db.get("networks").find({ id: nwid });
+  if (!network.value()) return;
+
+  const lastAccessedAt = Number(timestamp);
+  if (!Number.isFinite(lastAccessedAt)) return;
+
+  network.set("additionalConfig.lastAccessedAt", lastAccessedAt).write();
+  return lastAccessedAt;
+}
+
 export async function deleteNetworkAdditionalData(nwid) {
   db.get("networks").remove({ id: nwid }).write();
 }
