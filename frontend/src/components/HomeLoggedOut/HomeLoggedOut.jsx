@@ -1,11 +1,14 @@
 import { useEffect } from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Typography } from "@material-ui/core";
 import { useLocalStorage } from "react-use";
 import { useHistory } from "react-router-dom";
 
 import { useTranslation } from "react-i18next";
 
 import axios from "axios";
+
+import LogIn from "components/LogIn";
+import { isEmbedded } from "utils/Embedded.mjs";
 
 function HomeLoggedOut() {
   const [, setLoggedIn] = useLocalStorage("loggedIn", false);
@@ -52,6 +55,13 @@ function HomeLoggedOut() {
         <Typography>
           <span>{t("loginToContinue")}</span>
         </Typography>
+
+        {/* The header bar is hidden inside GRIT Cloud, so offer log in here. */}
+        {isEmbedded() && (
+          <Box mt={2}>
+            <LogIn />
+          </Box>
+        )}
       </Grid>
     </Grid>
   );
