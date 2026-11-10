@@ -13,15 +13,12 @@ import Settings from "./routes/Settings";
 
 import Loading from "./components/Loading";
 
+import { isEmbedded } from "./utils/Embedded.mjs";
+
 import "./i18n";
 
 function App() {
-  let embedded = true;
-  try {
-    embedded = window.self !== window.top;
-  } catch {
-    // Cross-origin access means this app is embedded.
-  }
+  const embedded = isEmbedded();
 
   useEffect(() => {
     document.documentElement.classList.toggle("grit-embedded", embedded);
