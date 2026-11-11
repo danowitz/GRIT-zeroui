@@ -33,6 +33,17 @@ test("embedded ZeroUI still offers a log in button when the header bar is hidden
 
   // The header bar (the only other home for the log in button) is hidden
   // inside GRIT Cloud, so the logged-out page must render it itself.
-  assert.match(app, /\{!embedded && <Bar \/>\}/);
+  assert.match(app, /\{embedded \? <EmbeddedAccountMenu \/> : <Bar \/>\}/);
   assert.match(loggedOut, /isEmbedded\(\) && \(\s*<Box mt=\{2\}>\s*<LogIn \/>/);
+});
+
+test("embedded ZeroUI offers log in on every logged-out page, not only home", () => {
+  const read = (path) =>
+    fs.readFileSync(new URL(path, import.meta.url), "utf8");
+  const notAuthorized = read("../components/NotAuthorized/NotAuthorized.jsx");
+
+  assert.match(notAuthorized, /isEmbedded\(\) && \(\s*<Box mt=\{2\}>\s*<LogIn \/>/);
+  for (const route of ["Network/Network.jsx", "Settings/Settings.jsx"]) {
+    assert.match(read("../routes/" + route), /return <NotAuthorized \/>;/);
+  }
 });

@@ -1,10 +1,11 @@
-import { Grid, Link, Typography } from "@material-ui/core";
+import { Link } from "@material-ui/core";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import NetworkHeader from "components/NetworkHeader";
 import NetworkManagement from "components/NetworkManagement";
 import NetworkMembers from "components/NetworkMembers";
 import NetworkRules from "components/NetworkRules";
 import NetworkSettings from "components/NetworkSettings";
+import NotAuthorized from "components/NotAuthorized";
 import { useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, useHistory, useParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
@@ -65,22 +66,7 @@ function Network() {
       </>
     );
   } else {
-    return (
-      <Grid
-        container
-        spacing={0}
-        direction="column"
-        alignItems="center"
-        justify="center"
-        style={{
-          minHeight: "50vh",
-        }}
-      >
-        <Grid item xs={10}>
-          <Typography variant="h5">{t("notAuthorized")}</Typography>
-        </Grid>
-      </Grid>
-    );
+    return <NotAuthorized />;
   }
 }
 
