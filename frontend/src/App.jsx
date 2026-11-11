@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Redirect, Switch } from "react-router-dom";
 
 import Theme from "./components/Theme";
 import Bar from "./components/Bar";
+import EmbeddedAccountMenu from "./components/EmbeddedAccountMenu";
 
 import Home from "./routes/Home";
 import NotFound from "./routes/NotFound";
@@ -29,7 +30,7 @@ function App() {
     <Theme>
       <Suspense fallback={<Loading />}>
         <BrowserRouter basename="/app">
-          {!embedded && <Bar />}
+          {embedded ? <EmbeddedAccountMenu /> : <Bar />}
           <Switch>
             <Route exact path="/" component={Home} />
             <Route path="/network/:nwid" component={Network} />
