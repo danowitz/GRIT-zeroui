@@ -52,3 +52,13 @@ No new dependency, model, protocol or architecture decision; no ADR needed.
 Release assessment: READY FOR INDEPENDENT REVIEW. Production boundary remains
 none — repository change only. Local screenshot evidence and disposable browser
 scripts are in ignored `output/playwright/`; they are not shipped assets.
+
+## Requested review follow-up
+
+Fresh review of `60f00b2` found one Minor visual regression: at standalone 320px,
+`192.168.255.0/24` extended about 10px past the tile border despite no page-level
+horizontal overflow. The correction lets CIDR text wrap within its available
+width, preserving the complete value. Browser regression checks now measure each
+rendered CIDR line against its tile border as well as document overflow: 52/52
+width/input/embedding combinations passed with long CIDRs and a 15-character Hub
+IPv4. No handlers, APIs, data, or support behavior changed.

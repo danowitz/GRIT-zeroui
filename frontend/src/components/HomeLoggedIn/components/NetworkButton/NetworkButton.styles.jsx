@@ -141,6 +141,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: "0.8125rem",
+    overflowWrap: "anywhere",
   },
   accessed: {
     color: theme.palette.text.secondary,
