@@ -24,13 +24,14 @@ const useStyles = makeStyles((theme) => ({
   },
   card: {
     position: "relative",
-    minHeight: 76,
     display: "grid",
     gridTemplateColumns:
-      "minmax(150px, 1.4fr) minmax(175px, 1.2fr) minmax(120px, .9fr) minmax(105px, .7fr) minmax(115px, .8fr) minmax(250px, 1.8fr) 24px",
+      "minmax(0, 1.2fr) minmax(155px, 1.2fr) minmax(125px, 1fr) minmax(120px, 1fr) minmax(85px, .8fr) 20px",
+    gridTemplateAreas:
+      '"name network hub range access chevron" "actions actions actions actions actions chevron"',
     alignItems: "center",
-    gap: theme.spacing(3),
-    padding: theme.spacing(1.5, 2),
+    gap: theme.spacing(0.75, 1.5),
+    padding: theme.spacing(1.25, 1.5),
     background: "#ffffff",
     border: "1px solid #dfe2e5",
     borderRadius: 9,
@@ -43,68 +44,54 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.down("sm")]: {
       gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) 20px",
-      gap: theme.spacing(1.5),
+      gridTemplateAreas:
+        '"name access chevron" "network hub chevron" "range hub chevron" "actions actions actions"',
+      gap: theme.spacing(0.5, 1.5),
     },
     [theme.breakpoints.down("xs")]: {
-      gridTemplateColumns: "minmax(0, 1fr) 20px",
-      padding: theme.spacing(1.5),
+      gridTemplateColumns: "minmax(155px, 1.2fr) minmax(0, 1fr) 16px",
+      gridTemplateAreas:
+        '"name name chevron" "network access chevron" "hub range range" "actions actions actions"',
+      padding: theme.spacing(1, 1.25),
+      gap: theme.spacing(0.5, 1),
     },
   },
   nameColumn: {
+    gridArea: "name",
     minWidth: 0,
-    [theme.breakpoints.down("sm")]: {
-      gridColumn: "1 / 3",
-    },
-    [theme.breakpoints.down("xs")]: {
-      gridColumn: "1",
-    },
   },
   detail: {
     minWidth: 0,
-    [theme.breakpoints.down("xs")]: {
-      gridColumn: "1",
-    },
   },
   networkDetail: {
-    gridColumn: "2",
+    gridArea: "network",
     [theme.breakpoints.down("sm")]: {
-      gridColumn: "1",
-    },
-    [theme.breakpoints.down("xs")]: {
-      gridColumn: "1",
+      "& > $label": { display: "none" },
     },
   },
   hubDetail: {
-    gridColumn: "3",
+    gridArea: "hub",
     position: "relative",
     zIndex: 2,
-    [theme.breakpoints.down("sm")]: {
-      gridColumn: "2",
-    },
-    [theme.breakpoints.down("xs")]: {
-      gridColumn: "1",
-    },
   },
   cidrDetail: {
-    gridColumn: "4",
-    [theme.breakpoints.down("sm")]: {
-      gridColumn: "1",
-    },
-    [theme.breakpoints.down("xs")]: {
-      gridColumn: "1",
+    gridArea: "range",
+    [theme.breakpoints.between("sm", "sm")]: {
+      display: "flex",
+      alignItems: "baseline",
+      gap: theme.spacing(0.75),
+      "& > $label": { marginBottom: 0 },
     },
   },
   accessDetail: {
-    gridColumn: "5",
+    gridArea: "access",
     [theme.breakpoints.down("sm")]: {
-      gridColumn: "2",
-    },
-    [theme.breakpoints.down("xs")]: {
-      gridColumn: "1",
+      justifySelf: "end",
+      "& > $label": { display: "none" },
     },
   },
   supportActions: {
-    gridColumn: "6",
+    gridArea: "actions",
     position: "relative",
     zIndex: 3,
     display: "flex",
@@ -114,8 +101,12 @@ const useStyles = makeStyles((theme) => ({
       fontSize: "0.68rem",
       padding: theme.spacing(0.25, 0.75),
     },
-    [theme.breakpoints.down("sm")]: { gridColumn: "1 / 3" },
-    [theme.breakpoints.down("xs")]: { gridColumn: "1" },
+    "@media (pointer: coarse)": {
+      "& .MuiButton-root": {
+        minHeight: 44,
+        flex: "1 0 auto",
+      },
+    },
   },
   supportStatus: {
     flexBasis: "100%",
@@ -150,6 +141,7 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
     fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: "0.8125rem",
+    overflowWrap: "anywhere",
   },
   accessed: {
     color: theme.palette.text.secondary,
@@ -184,20 +176,12 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   chevron: {
-    gridColumn: "7",
+    gridArea: "chevron",
     color: theme.palette.text.secondary,
     transition: "transform 140ms ease, color 140ms ease",
     "$card:hover &": {
       color: theme.palette.primary.main,
       transform: "translateX(2px)",
-    },
-    [theme.breakpoints.down("sm")]: {
-      gridColumn: "3",
-      gridRow: "1 / 6",
-    },
-    [theme.breakpoints.down("xs")]: {
-      gridColumn: "2",
-      gridRow: "1 / 6",
     },
   },
 }));

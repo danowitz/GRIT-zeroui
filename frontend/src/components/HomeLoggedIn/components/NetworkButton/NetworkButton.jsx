@@ -173,15 +173,16 @@ function NetworkButton({ network, refreshVersion = 0 }) {
         <span className={classes.srOnly}>{name}</span>
       </Link>
       <div className={classes.nameColumn}>
-        <Typography className={classes.label}>
-          {t("network", { count: 1 })}
+        <Typography className={classes.name} title={name}>
+          {name}
         </Typography>
-        <Typography className={classes.name}>{name}</Typography>
       </div>
       <div className={`${classes.detail} ${classes.networkDetail}`}>
         <Typography className={classes.label}>{t("networkId")}</Typography>
         <div className={classes.copyValue}>
-          <Typography className={classes.nwid}>{network.id}</Typography>
+          <Typography className={classes.nwid} title={t("networkId")}>
+            {network.id}
+          </Typography>
           {copyButton(network.id, t("copyNetworkId"))}
         </div>
       </div>
@@ -210,7 +211,9 @@ function NetworkButton({ network, refreshVersion = 0 }) {
       </div>
       <div className={`${classes.detail} ${classes.accessDetail}`}>
         <Typography className={classes.label}>{t("lastAccessed")}</Typography>
-        <Typography className={classes.accessed}>{lastAccessed}</Typography>
+        <Typography className={classes.accessed} title={t("lastAccessed")}>
+          {lastAccessed}
+        </Typography>
       </div>
       <div
         className={classes.supportActions}

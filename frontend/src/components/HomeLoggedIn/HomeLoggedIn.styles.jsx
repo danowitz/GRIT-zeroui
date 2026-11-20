@@ -5,30 +5,34 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     maxWidth: 1180,
     margin: "0 auto",
-    padding: theme.spacing(6, 4, 8),
+    padding: theme.spacing(3, 2, 4),
     "html.grit-embedded &": {
       maxWidth: "none",
       margin: 0,
       padding: 0,
     },
     [theme.breakpoints.down("sm")]: {
-      padding: theme.spacing(3, 2, 5),
+      padding: theme.spacing(2, 1.5, 3),
     },
   },
   hero: {
     display: "flex",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: theme.spacing(3),
-    marginBottom: theme.spacing(4),
+    gap: theme.spacing(1.5),
+    marginBottom: theme.spacing(2),
     [theme.breakpoints.down("xs")]: {
       flexDirection: "column",
-      marginBottom: theme.spacing(3),
+      gap: theme.spacing(1),
+      marginBottom: theme.spacing(1.5),
     },
   },
   title: {
     fontWeight: 700,
     letterSpacing: "-0.02em",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "1.5rem",
+    },
   },
   subtitle: {
     color: theme.palette.text.secondary,
@@ -41,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     gap: theme.spacing(1),
     color: theme.palette.text.secondary,
     fontSize: "0.8125rem",
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(0.75),
     "& strong": {
       color: theme.palette.text.primary,
       fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
@@ -58,18 +62,17 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "none",
     boxShadow: "none",
     [theme.breakpoints.down("xs")]: {
-      width: "100%",
+      alignSelf: "flex-start",
     },
   },
   networkSection: {
     background: theme.palette.background.paper,
     border: "1px solid #dfe2e5",
     borderRadius: 12,
-    padding: theme.spacing(3),
+    padding: theme.spacing(1.5),
     boxShadow: "0 8px 28px rgba(30, 38, 45, 0.08)",
     [theme.breakpoints.down("xs")]: {
-      margin: theme.spacing(0, -1),
-      padding: theme.spacing(2),
+      padding: theme.spacing(1),
       borderRadius: 10,
     },
   },
@@ -77,8 +80,9 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: theme.spacing(2),
-    paddingBottom: theme.spacing(2.5),
+    flexWrap: "wrap",
+    gap: theme.spacing(1.5),
+    paddingBottom: theme.spacing(1.5),
     borderBottom: "1px solid #e5e7e9",
     [theme.breakpoints.down("sm")]: {
       alignItems: "stretch",
@@ -91,30 +95,35 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(0.25),
   },
   listControls: {
-    display: "flex",
+    display: "grid",
+    gridTemplateColumns: "minmax(180px, 1fr) 190px auto",
     alignItems: "center",
-    gap: theme.spacing(1.5),
+    gap: theme.spacing(1),
+    flex: "1 1 560px",
     [theme.breakpoints.down("sm")]: {
       width: "100%",
+      flex: "none",
     },
     [theme.breakpoints.down("xs")]: {
-      alignItems: "stretch",
-      flexDirection: "column",
+      gridTemplateColumns: "minmax(0, 1fr) auto",
+      flex: "none",
     },
   },
   search: {
-    width: 360,
+    width: "100%",
+    minWidth: 0,
     maxWidth: "100%",
     "& .MuiOutlinedInput-root": {
       borderRadius: 8,
       background: "#ffffff",
     },
     [theme.breakpoints.down("xs")]: {
-      width: "100%",
+      gridColumn: "1 / -1",
     },
   },
   sort: {
-    width: 190,
+    width: "100%",
+    minWidth: 0,
     flexShrink: 0,
     "& .MuiOutlinedInput-root": {
       borderRadius: 8,
@@ -137,8 +146,8 @@ const useStyles = makeStyles((theme) => ({
   },
   networkList: {
     display: "grid",
-    gap: theme.spacing(1.25),
-    marginTop: theme.spacing(2.5),
+    gap: theme.spacing(0.75),
+    marginTop: theme.spacing(1.5),
   },
   emptyState: {
     minHeight: 220,
